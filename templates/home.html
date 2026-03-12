@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+    {% extends "base.html" %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+
+<section class="hero-section text-center text-white">
+    <div class="container">
+        <h1 class="display-4">LaxmiPrint</h1>
+        <h2 class="display-4">Premium Printing Services</h2>
+        <p class="lead">Visiting Cards, Banners, Flyers, Stickers and More</p>
+
+        <a href="/products" class="btn btn-light btn-lg mt-3">
+            View Products
+        </a>
+    </div>
+</section>
+
+
+<!-- ABOUT SECTION -->
+
+<section class="container mt-5 text-center">
+
+    <h2>Why Choose Us</h2>
+
+    <p class="mt-3">
+        We provide high quality printing solutions for businesses and individuals.
+        From visiting cards to banners, we deliver premium prints with fast turnaround.
+    </p>
+
+</section>
+
+
+<!-- FEATURED PRODUCTS -->
+
+<section class="container mt-5">
+
+    <h2 class="text-center mb-4">Our Products</h2>
+
+    <div class="row">
+
+        {% for product in products %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card product-card">
+
+                <img src="{{ url_for('static', filename='uploads/' + product[3]) }}"
+                     class="card-img-top">
+
+                <div class="card-body text-center">
+
+                    <h5 class="card-title">{{ product[1] }}</h5>
+
+                    <p class="card-text">{{ product[2][:80] }}...</p>
+
+                    <a href="/product_details/{{ product[0] }}"
+                       class="btn btn-dark">
+                       View Details
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+<!-- CALL TO ACTION -->
+
+<section class="cta-section text-center text-white mt-5">
+
+    <div class="container">
+
+        <h2>Need Custom Printing?</h2>
+
+        <p>Contact us today for bulk orders and custom designs.</p>
+
+        <a href="https://wa.me/your-number"
+           class="btn btn-success btn-lg">
+           Chat on WhatsApp
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}
+    
+</body>
+</html>

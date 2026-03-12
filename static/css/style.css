@@ -1,0 +1,122 @@
+body{
+    font-family: Arial;
+   background: linear-gradient(to right, #f8f9fa, #e9ecef);
+}
+
+.card img{
+    height: 220px;
+    object-fit: cover;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+/* HERO SECTION */
+
+.hero-section{
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.5)),
+                url('/static/uploads/newai1.jpg');
+    background-size: cover;
+    background-position: center;
+    padding:120px 0;
+    color: white;
+}
+
+
+/* PRODUCT CARDS */
+
+.product-card{
+    border:none;
+    transition:0.3s;
+}
+
+.product-card:hover{
+    transform: translateY(-5px);
+    box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+.product-card img{
+    height:220px;
+    object-fit:cover;
+}
+
+
+/* CTA SECTION */
+
+.cta-section{
+    background:#514e55;
+    padding:80px 0;
+}
+.navbar-brand{
+    font-size: 24px;
+}
+
+.navbar a{
+    font-size: 16px;
+}
+
+.navbar a:hover{
+    color:#f8c146 ;
+}
+.about-page h3{
+margin-top:20px;
+}
+
+.about-page ul{
+line-height:1.8;
+}
+.card{
+border-radius:12px;
+transition:all 0.3s ease;
+overflow:hidden;
+}
+
+.card:hover{
+transform:translateY(-8px);
+box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+
+.card img{
+height:180px;
+object-fit:cover;
+transition:transform 0.3s ease;
+}
+
+.card:hover img{
+transform:scale(1.05);
+}
+.card-img-top{
+height:200px;
+object-fit:contain;
+background:#f8f9fa;
+padding:10px;
+}
+.about-hero{
+padding:60px 20px;
+background:linear-gradient(135deg,#f8fafc,#e2e8f0);
+border-radius:15px;
+margin-bottom:40px;
+}
+.footer{
+background:#111;
+color:white;
+padding:40px 0;
+}
+
+.footer h5{
+margin-bottom:15px;
+}
+
+.footer a{
+color:#ddd;
+text-decoration:none;
+}
+
+.footer a:hover{
+color:white;
+}
+
+.footer hr{
+border-color:#444;
+}

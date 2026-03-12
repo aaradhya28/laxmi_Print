@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produt Details</title>
+</head>
+<body>
+    {% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+<h2 class="mb-4">{{ product[1] }}</h2>
+
+<div class="row">
+
+<!-- Left Side : Product Image -->
+<div class="col-md-6">
+
+<img src="{{ url_for('static', filename='uploads/' + product[3]) }}"
+class="img-fluid rounded">
+
+</div>
+
+
+<!-- Right Side : Product Information -->
+<div class="col-md-6">
+
+<h4>About Product</h4>
+<p>{{ product[2] }}</p>
+<p>{{ product[4] }}</p>
+<p>Price:{{ product[5] }}</p>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}
+    
+</body>
+</html>

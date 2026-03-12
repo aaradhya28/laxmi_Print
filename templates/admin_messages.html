@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User_info</title>
+</head>
+<body>
+    {% extends 'base.html' %}
+
+    {% block content %}
+    <h2 class="mb-4">Contact Messages</h2>
+
+<table class="table table-bordered">
+
+<thead class="table-dark">
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Message</th>
+<th>Phone</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for msg in messages %}
+
+<tr>
+
+<td>{{ msg[0] }}</td>
+<td>{{ msg[1] }}</td>
+<td>{{ msg[2] }}</td>
+<td>{{ msg[3] }}</td>
+<td>{{ msg[4] }}</td>
+
+<td>
+<a href="/delete_message/{{ msg[0] }}" class="btn btn-danger btn-sm">
+Delete
+</a>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+        
+    {% endblock %}
+    
+</body>
+</html>

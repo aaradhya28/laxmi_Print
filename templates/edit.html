@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Panel</title>
+</head>
+<body>
+    {% extends 'base.html' %}
+
+    {% block content %}
+        <h2>Edit Product</h2>
+
+<form method="POST" enctype="multipart/form-data">
+
+    <input type="text"
+           name="name"
+           class="form-control mb-2"
+           value="{{ product[1] }}"
+           required>
+
+    <textarea name="description"
+              class="form-control mb-2"
+              required>{{ product[2] }}</textarea>
+
+    <textarea name="specifications"
+          class="form-control mb-2"
+          placeholder="Specifications">{{ product[4] }}</textarea>
+
+
+    <input type="text"
+       name="price"
+       class="form-control mb-2"
+       placeholder="Price">{{product[5]}} </input>
+
+    <label>Current Image:</label><br>
+    <img src="{{ url_for('static', filename='uploads/' + product[3]) }}"
+         width="150"
+         class="mb-3">
+
+    <input type="file"
+           name="image"
+           class="form-control mb-2">
+
+    <button class="btn btn-dark">Update</button>
+
+</form>
+    {% endblock %}
+
+    
+</body>
+</html>

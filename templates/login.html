@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block content %}
+        <h2>Admin Login</h2>
+
+<form method="POST">
+    <input type="text" name="username"
+           class="form-control mb-2"
+           placeholder="Username" required>
+
+    <input type="password" name="password"
+           class="form-control mb-2"
+           placeholder="Password" required>
+
+    <button class="btn btn-dark">Login</button>
+</form>
+    {% endblock %}
+    
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+</head>
+<body>
+    {% extends "base.html" %}
+    {% block content %}
+    <a href="/admin/messages" class="btn btn-dark">
+View Contact Messages
+</a>
+<hr>
+    <h2>Add New Product</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input class="form-control mb-2" type="text" name="name" placeholder="Product Name" required>
+
+    <textarea class="form-control mb-2" name="description" placeholder="Description" required></textarea>
+    
+    <textarea class="form-control mb-2" name="specifications" placeholder="Specifications"></textarea>
+
+    <input class="form-control mb-2" type="text" name="price" placeholder="Price">
+
+    <input type="file" name="image" class="form-control mb-2" required>
+
+    <button class="btn btn-dark">Add Product</button>
+    </form>
+
+    <hr>
+<h3>All Products</h3>
+
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Specifications</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for product in products %}
+    <tr>
+        <td>{{ product[1] }}</td>
+        <td>{{ product[5] }}</td>
+        <td>{{ product[4] }}</td>
+        <td>
+            <a href="/edit/{{ product[0] }}" 
+   class="btn btn-outline-warning btn-sm me-3"
+   title="Edit Product">
+
+<i class="bi bi-pencil-square"></i>
+</a>
+
+<a href="/delete/{{ product[0] }}" 
+   class="btn btn-outline-danger btn-sm"
+   title="Delete Product"
+   onclick="return confirm('Are you sure?')">
+
+<i class="bi bi-trash"></i>
+</a>
+        </td>
+    </tr>
+    {% endfor %}
+        
+  
+    
+</table>
+  {% endblock %}
+    
+</body>
+</html>
