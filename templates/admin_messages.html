@@ -20,6 +20,7 @@
 <th>Email</th>
 <th>Message</th>
 <th>Phone</th>
+<th>Status</th>
 <th>Action</th>
 </tr>
 </thead>
@@ -35,11 +36,26 @@
 <td>{{ msg[2] }}</td>
 <td>{{ msg[3] }}</td>
 <td>{{ msg[4] }}</td>
-
 <td>
-<a href="/delete_message/{{ msg[0] }}" class="btn btn-danger btn-sm">
-Delete
+  {% if msg[5] == 0 %}
+    <span class="badge bg-danger">Unread</span>
+  {% else %}
+    <span class="badge bg-success">Read</span>
+  {% endif %}
+</td>
+<td>
+<a href="/delete_message/{{ msg[0] }}" 
+   class="btn btn-outline-danger btn-sm me-2"
+   title="Delete">
+   <i class="bi bi-trash"></i>
 </a>
+{% if msg[5] == 0 %}
+<a href="/mark-read/{{ msg[0] }}" 
+   class="btn btn-outline-success btn-sm me-2"
+   title="Mark as Read">
+   <i class="bi bi-check-circle"></i>
+</a>
+{% endif %}
 </td>
 
 </tr>

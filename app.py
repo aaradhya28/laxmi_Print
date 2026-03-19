@@ -1,10 +1,21 @@
 from flask import Flask,render_template,redirect,request,session,url_for
 import sqlite3
 import os
+from flask_mail import Mail,Message
+from flask import flash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'chandiwadeaaradhya@gmail.com'
+app.config['MAIL_PASSWORD'] = 'zayvmpzaxzslqazk'
+
+mail = Mail(app)
+
 app.secret_key="supersecretkey"
 UPLOAD_FOLDER='static/uploads'
 app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
@@ -65,6 +76,69 @@ def update_contact_db():
 
     conn.commit()
     conn.close()
+
+# def update_contact_status():
+#     conn = sqlite3.connect("database.db")
+#     cursor = conn.cursor()
+
+#     cursor.execute("ALTER TABLE contacts ADD COLUMN is_read INTEGER DEFAULT 0")
+
+#     conn.commit()
+#     conn.close()
+def add_is_read_column():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    cursor.execute("ALTER TABLE contacts ADD COLUMN is_read INTEGER DEFAULT 0")
+
+    conn.commit()
+    conn.close()
+
+
+
+def reset_read_status():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE contacts SET is_read = 0")
+
+    conn.commit()
+    conn.close()
+init_db()
+contact_db()
+
+def create_admin_table():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS admin(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+def create_admin():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    username = "admin"
+    password = generate_password_hash("1234")  # encrypted
+
+    try:
+        cursor.execute("INSERT INTO admin (username, password) VALUES (?, ?)", (username, password))
+    except:
+        pass  # already exists
+
+    conn.commit()
+    conn.close()
+# create_admin()
+# create_admin_table()
+# add_is_read_column()
+# reset_read_status()
 # update_contact_db()
 # products = [
 #     {
@@ -137,6 +211,79 @@ def contact():
 
         conn.commit()
         conn.close()
+        msg = Message(
+            subject="New Contact Form Submission",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=["chandiwadeaaradhya@gmail.com"]
+        )
+
+        msg.html = f"""
+        <h2 style="color:#333;">New Contact Form Submission</h2>
+
+        <table style="border-collapse: collapse; width: 100%; font-family: Arial;">
+        <tr>
+            <td style="padding:8px; border:1px solid #ddd;"><b>Name</b></td>
+            <td style="padding:8px; border:1px solid #ddd;">{name}</td>
+        </tr>
+
+        <tr>
+            <td style="padding:8px; border:1px solid #ddd;"><b>Email</b></td>
+            <td style="padding:8px; border:1px solid #ddd;">{email}</td>
+        </tr>
+
+        <tr>
+            <td style="padding:8px; border:1px solid #ddd;"><b>Phone</b></td>
+            <td style="padding:8px; border:1px solid #ddd;">{phone}</td>
+        </tr>
+
+        <tr>
+            <td style="padding:8px; border:1px solid #ddd;"><b>Message</b></td>
+            <td style="padding:8px; border:1px solid #ddd;">{message}</td>
+        </tr>
+        </table>
+
+        <br>
+
+        <p style="color:gray;">
+        This message was sent from your website contact form.
+        </p>
+        """
+
+        mail.send(msg)
+
+        reply = Message(
+            subject="✅ Thank You for Contacting LaxmiPrint",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[email]   # user email
+        )
+
+        reply.html = f"""
+            <h2 style="color:#333;">Hello {name}, 👋</h2>
+
+            <p>Thank you for contacting <b>LaxmiPrint</b>.</p>
+
+            <p>We have received your inquiry and our team will get back to you within <b>24 hours</b>.</p>
+
+            <hr>
+
+            <h4>Your Message:</h4>
+            <p style="background:#f4f4f4; padding:10px; border-radius:5px;">
+            {message}
+            </p>
+
+            <br>
+
+            <p>📞 If urgent, feel free to contact us directly.</p>
+
+            <p style="color:gray;">
+            Regards,<br>
+            <b>LaxmiPrint Team</b>
+            </p>
+            """
+
+        mail.send(reply)
+        flash("✅ Your message has been sent successfully!")
+        return redirect("/contact")  # better UX after submit
 
     return render_template("contact.html")
 
@@ -267,15 +414,24 @@ def edit_product(id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method=="POST":
-        username=request.form["username"]
-        password=request.form["password"]
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
 
-        if username=="admin" and password=="1234":
-            session["admin"]=True
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM admin WHERE username=?", (username,))
+        admin = cursor.fetchone()
+
+        conn.close()
+
+        if admin and check_password_hash(admin[2], password):
+            session["admin"] = True
             return redirect("/admin")
         else:
-            return "Invalid Credentials"
+            flash("Invalid credentials", "danger")
+
     return render_template("login.html")
 @app.route('/logout')
 def logout():
@@ -302,6 +458,20 @@ def delete_message(id):
     cursor = conn.cursor()
 
     cursor.execute("DELETE FROM contacts WHERE id=?", (id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/admin/messages")
+@app.route("/mark-read/<int:id>")
+def mark_read(id):
+    if 'admin' not in session:
+        return redirect("/login")
+
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE contacts SET is_read=1 WHERE id=?", (id,))
 
     conn.commit()
     conn.close()

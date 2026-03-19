@@ -120,3 +120,13 @@ color:white;
 .footer hr{
 border-color:#444;
 }
+
+.btn-outline-success:hover {
+    background-color: #198754;
+    color: white;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
