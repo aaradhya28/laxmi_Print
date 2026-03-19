@@ -16,7 +16,7 @@ app.config['MAIL_PASSWORD'] = 'zayvmpzaxzslqazk'
 
 mail = Mail(app)
 
-app.secret_key="supersecretkey"
+app.secret_key = os.environ.get("SECRET_KEY")
 UPLOAD_FOLDER='static/uploads'
 app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
 
