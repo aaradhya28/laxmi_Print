@@ -359,7 +359,31 @@ def admin_messages():
 
     return render_template("admin_messages.html", messages=messages)
 
+@app.route("/delete_message/<int:id>")
+def delete_message(id):
+    if 'admin' not in session:
+        return redirect("/login")
 
+    conn = get_db_connection()
+
+    conn.execute("DELETE FROM contacts WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
+    return redirect("/admin/messages")
+
+@app.route("/mark-read/<int:id>")
+def mark_read(id):
+    if 'admin' not in session:
+        return redirect("/login")
+
+    conn = get_db_connection()
+
+    conn.execute("UPDATE contacts SET is_read=1 WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
+    return redirect("/admin/messages")
 
 
 
