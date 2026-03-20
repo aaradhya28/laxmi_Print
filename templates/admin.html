@@ -41,18 +41,18 @@ View Contact Messages
 
     {% for product in products %}
     <tr>
-        <td>{{ product[1] }}</td>
-        <td>{{ product[5] }}</td>
-        <td>{{ product[4] }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.price }}</td>
+        <td>{{ product.specifications }}</td>
         <td>
-            <a href="/edit/{{ product[0] }}" 
+            <a href="/edit/{{ product.id }}" 
    class="btn btn-outline-warning btn-sm me-3"
    title="Edit Product">
 
 <i class="bi bi-pencil-square"></i>
 </a>
 
-<a href="/delete/{{ product[0] }}" 
+<a href="/delete/{{ product.id }}" 
    class="btn btn-outline-danger btn-sm"
    title="Delete Product"
    onclick="return confirm('Are you sure?')">

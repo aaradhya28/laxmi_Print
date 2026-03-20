@@ -12,14 +12,14 @@
 
 <div class="container mt-5">
 
-<h2 class="mb-4">{{ product[1] }}</h2>
+<h2 class="mb-4">{{ product.name }}</h2>
 
 <div class="row">
 
 <!-- Left Side : Product Image -->
 <div class="col-md-6">
 
-<img src="{{ url_for('static', filename='uploads/' + product[3]) }}"
+<img src="{{ url_for('static', filename='uploads/' + product.image) }}"
 class="img-fluid rounded">
 
 </div>
@@ -29,9 +29,9 @@ class="img-fluid rounded">
 <div class="col-md-6">
 
 <h4>About Product</h4>
-<p>{{ product[2] }}</p>
-<p>{{ product[4] }}</p>
-<p>Price:{{ product[5] }}</p>
+<p>{{ product.description }}</p>
+<p>{{ product.specifications }}</p>
+<p>Price:{{ product.price }}</p>
 
 </div>
 

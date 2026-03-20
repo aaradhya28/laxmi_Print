@@ -11,8 +11,10 @@ app = Flask(__name__)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME")
+app.config['MAIL_USERNAME']  = os.environ.get("MAIL_USERNAME")
 app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
+
+app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
 
 mail = Mail(app)
 
@@ -131,13 +133,84 @@ def contact():
             sender=app.config['MAIL_USERNAME'],
             recipients=[app.config['MAIL_USERNAME']]
         )
-        msg.body = f"Name: {name}\nEmail: {email}\nPhone: {phone}\nMessage: {message}"
+        msg.body = f"""<h2 style="color:#333;">New Contact Form Submission</h2>
+
+        <table style="border-collapse: collapse; width: 100%; font-family: Arial;">
+        <tr>
+            <td style="padding:8px; border:1px solid #ddd;"><b>Name</b></td>
+            <td style="padding:8px; border:1px solid #ddd;">{name}</td>
+        </tr>
+
+        <tr>
+            <td style="padding:8px; border:1px solid #ddd;"><b>Email</b></td>
+            <td style="padding:8px; border:1px solid #ddd;">{email}</td>
+        </tr>
+
+        <tr>
+            <td style="padding:8px; border:1px solid #ddd;"><b>Phone</b></td>
+            <td style="padding:8px; border:1px solid #ddd;">{phone}</td>
+        </tr>
+
+        <tr>
+            <td style="padding:8px; border:1px solid #ddd;"><b>Message</b></td>
+            <td style="padding:8px; border:1px solid #ddd;">{message}</td>
+        </tr>
+        </table>
+
+        <br>
+
+        <p style="color:gray;">
+        This message was sent from your website contact form.
+        </p>
+        """
         mail.send(msg)
 
-        flash("Message sent successfully!")
-        return redirect("/contact")
+        
+        reply = Message(
+            subject="✅ Thank You for Contacting LaxmiPrint",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[email]   # user email
+        )
 
+        reply.html = f"""
+            <h2 style="color:#333;">Hello {name}, 👋</h2>
+
+            <p>Thank you for contacting <b>LaxmiPrint</b>.</p>
+
+            <p>We have received your inquiry and our team will get back to you within <b>24 hours</b>.</p>
+
+            <hr>
+
+            <h4>Your Message:</h4>
+            <p style="background:#f4f4f4; padding:10px; border-radius:5px;">
+            {message}
+            </p>
+
+            <br>
+
+            <p>📞 If urgent, feel free to contact us directly.</p>
+
+            <p style="color:gray;">
+            Regards,<br>
+            <b>LaxmiPrint Team</b>
+            </p>
+            """
+
+        mail.send(reply)
+        flash("✅ Your message has been sent successfully!")
+        return redirect("/contact")
+    
     return render_template("contact.html")
+
+@app.route("/product_details/<int:id>")
+def product_details(id):
+    conn = get_db_connection()
+    product = conn.execute(
+        "SELECT * FROM products WHERE id=?", (id,)
+    ).fetchone()
+    conn.close()
+
+    return render_template("product_details.html", product=product)
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
@@ -167,6 +240,91 @@ def admin():
 
     return render_template("admin.html", products=products)
 
+@app.route('/delete/<int:id>')
+def delete_product(id):
+    if 'admin' not in session:
+        return redirect('/login')
+
+    conn = get_db_connection()
+
+    # Get image name
+    product = conn.execute(
+        "SELECT image FROM products WHERE id=?", (id,)
+    ).fetchone()
+
+    if product:
+        image_filename = product["image"]
+
+        # Delete image file
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
+        # Delete from DB
+        conn.execute("DELETE FROM products WHERE id=?", (id,))
+        conn.commit()
+
+    conn.close()
+    return redirect('/admin')
+
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_product(id):
+    if 'admin' not in session:
+        return redirect('/login')
+
+    conn = get_db_connection()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        specifications = request.form['specifications']
+        price = request.form['price']
+        file = request.files['image']
+
+        # Get old image
+        old_product = conn.execute(
+            "SELECT image FROM products WHERE id=?", (id,)
+        ).fetchone()
+
+        old_image = old_product["image"]
+
+        if file and file.filename:
+            # Delete old image
+            old_path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
+            if os.path.exists(old_path):
+                os.remove(old_path)
+
+            # Save new image
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            conn.execute("""
+                UPDATE products
+                SET name=?, description=?, image=?, specifications=?, price=?
+                WHERE id=?
+            """, (name, description, filename, specifications, price, id))
+
+        else:
+            # No new image
+            conn.execute("""
+                UPDATE products
+                SET name=?, description=?, specifications=?, price=?
+                WHERE id=?
+            """, (name, description, specifications, price, id))
+
+        conn.commit()
+        conn.close()
+
+        return redirect('/admin')
+
+    # GET request
+    product = conn.execute(
+        "SELECT * FROM products WHERE id=?", (id,)
+    ).fetchone()
+
+    conn.close()
+    return render_template('edit.html', product=product)
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == "POST":
@@ -189,6 +347,19 @@ def login():
 def logout():
     session.pop('admin', None)
     return redirect('/')
+
+@app.route("/admin/messages")
+def admin_messages():
+    if 'admin' not in session:
+        return redirect("/login")
+
+    conn = get_db_connection()
+    messages = conn.execute("SELECT * FROM contacts").fetchall()
+    conn.close()
+
+    return render_template("admin_messages.html", messages=messages)
+
+
 
 
 

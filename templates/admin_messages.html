@@ -31,26 +31,26 @@
 
 <tr>
 
-<td>{{ msg[0] }}</td>
-<td>{{ msg[1] }}</td>
-<td>{{ msg[2] }}</td>
-<td>{{ msg[3] }}</td>
-<td>{{ msg[4] }}</td>
+<td>{{ msg.id }}</td>
+<td>{{ msg.name}}</td>
+<td>{{ msg.email }}</td>
+<td>{{ msg.message }}</td>
+<td>{{ msg.phone }}</td>
 <td>
-  {% if msg[5] == 0 %}
+  {% if msg.is_read == 0 %}
     <span class="badge bg-danger">Unread</span>
   {% else %}
     <span class="badge bg-success">Read</span>
   {% endif %}
 </td>
-<td>
-<a href="/delete_message/{{ msg[0] }}" 
+<td>  
+<a href="/delete_message/{{ msg.id }}" 
    class="btn btn-outline-danger btn-sm me-2"
    title="Delete">
    <i class="bi bi-trash"></i>
 </a>
 {% if msg[5] == 0 %}
-<a href="/mark-read/{{ msg[0] }}" 
+<a href="/mark-read/{{ msg.id }}" 
    class="btn btn-outline-success btn-sm me-2"
    title="Mark as Read">
    <i class="bi bi-check-circle"></i>
