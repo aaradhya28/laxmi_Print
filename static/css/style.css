@@ -130,3 +130,78 @@ border-color:#444;
     background-color: #dc3545;
     color: white;
 }
+
+
+/* .machine-slider {
+    overflow: hidden;
+    width: 100%;    
+
+}
+
+.machine-track {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.5s ease-in-out;
+}
+
+.machine-card {
+    min-width: 250px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+} */
+
+.machine-slider {
+    overflow-x: auto;   /* enable horizontal scroll */
+    padding: 10px;
+}
+
+.machine-slider::-webkit-scrollbar {
+    height: 8px;
+}
+
+.machine-slider::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.machine-track {
+    display: flex;
+    gap: 20px;
+    width: max-content; /* important */
+}
+
+.machine-card {
+    min-width: 250px;
+    flex-shrink: 0;
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center; /* prevents shrinking */
+}
+
+.machine-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.contact-info p {
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.navbar-brand img {
+    border-radius: 8px;
+}
+
+.navbar-brand span {
+    font-size: 20px;
+    letter-spacing: 1px;
+}
+
+ 

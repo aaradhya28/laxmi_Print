@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About</title>
-</head>
-<body>
+
     {% extends "base.html" %}
 
 {% block content %}
@@ -81,57 +74,87 @@ LaxmiPrint is a professional printing service dedicated to delivering high-quali
 
 </div>
 
-<div class="text-center mt-4">
-    <h3 class="text-center mt-5 mb-4 fw-bold">Our Printing Machinery</h3>
-
-<div class="row">
-
-<div class="col-md-3">
-<div class="card shadow-sm">
-<img src="/static/uploads/offset1.jpg" class="card-img-top" alt="Offset Printing Machine">
-<div class="card-body text-center">
-<h5 class="card-title">Offset Printer</h5>
-<p class="card-text">High quality bulk printing for cards, flyers and brochures.</p>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="card shadow-sm">
-<img src="/static/uploads/digital1.jpg.png" class="card-img-top" alt="Digital Printing Machine">
-<div class="card-body text-center">
-<h5 class="card-title">Digital Printer</h5>
-<p class="card-text">Fast digital printing for small and custom orders.</p>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="card shadow-sm">
-<img src="/static/uploads/banner1.jpg" class="card-img-top" alt="Banner Printing Machine">
-<div class="card-body text-center">
-<h5 class="card-title">Banner Printer</h5>
-<p class="card-text">Large format printing for banners and flex boards.</p>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="card shadow-sm">
-<img src="/static/uploads/cutting.jpg" class="card-img-top" alt="Cutting Machine">
-<div class="card-body text-center">
-<h5 class="card-title">Cutting Machine</h5>
-<p class="card-text">Precision cutting for clean and perfect finishing.</p>
-</div>
-</div>
-</div>
 
 </div>
 
-</div>
+<h3 class="text-center mt-5 mb-4 fw-bold">Our Printing Machinery</h3>
+
+<div class="machine-slider">
+
+  <div class="machine-track" id="track">
+
+   
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/black_white_machine.jpeg') }}">
+      <h5>Offset Printer</h5>
+      <p>High quality bulk printing</p>
+    </div>
+
+    
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/center_pinning_machine.png') }}">
+      <h5>Digital Printer</h5>
+      <p>Fast and flexible printing</p>
+    </div>
+
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/cold_laminions.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/crazing_properation_machine.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/eco_machine.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/feltbed_machine.png') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/flex_banner.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/konica_minolta.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/plotter_machine.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/Polar_cutting_machine.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/sticker_shape_cut_machine.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+    <div class="machine-card">
+      <img src="{{ url_for('static', filename='uploads/Thermal_laminious_machine.jpeg') }}">
+      <h5>Banner Machine</h5>
+      <p>Large format printing</p>
+    </div>
+
+    
+
+  </div>
 
 </div>
-
+ 
 {% endblock %}
-</body>
-</html>
