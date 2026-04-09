@@ -2,3 +2,4 @@ Flask
 gunicorn
 Werkzeug
 Flask-Mail
+python-dotenv
