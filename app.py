@@ -5,8 +5,7 @@ from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
-# Load env variables from `local.env` (used in this project) so email works.
-# Falls back to default dotenv lookup if not present.
+
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "local.env"))
 
 app = Flask(__name__)
@@ -14,7 +13,7 @@ app = Flask(__name__)
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD_HASH = "scrypt:32768:8:1$umEQs7nwfTWE45dj$d8e3e804e8df7b61a577121b3128af70cd254f75861bf2e8cec1cf44c20480311788b59e85309d2dc923a020c77325b7937eab057202653078954a532482319b"
 
-# ✅ Secure config (use environment variables)
+
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -30,14 +29,14 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# ✅ Database connection (Render safe)
+
 def get_db_connection():
     DB_PATH = os.path.join(os.getcwd(), "database.db")
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-# ✅ Initialize DB
+
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -75,12 +74,12 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ✅ Create admin if not exists
+
 def create_admin():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Refuse to create an admin with an unset placeholder hash.
+    
     if ADMIN_PASSWORD_HASH == "<PASTE_PASSWORD_HASH_HERE>":
         raise RuntimeError(
             "ADMIN_PASSWORD_HASH is not set. Generate a password hash and paste it into app.py."
@@ -89,7 +88,7 @@ def create_admin():
     username = ADMIN_USERNAME
     password_hash = ADMIN_PASSWORD_HASH
 
-    # Insert admin only if it doesn't already exist; otherwise update hash.
+    
     existing = cursor.execute(
         "SELECT id FROM admin WHERE username=?",
         (username,)
@@ -111,7 +110,7 @@ def create_admin():
 init_db()
 create_admin()
 
-# ---------------- ROUTES ---------------- #
+
 
 @app.route("/")
 def home():
@@ -251,7 +250,7 @@ def contact():
             mail.send(reply)    # user mail
             flash("✅ Your message has been sent successfully!", "success")
         except Exception as e:
-            print("Mail error:", e)  # check terminal logs
+            print("Mail error:", e)  
             flash("Message saved, but email could not be sent right now.", "warning")
     
     return render_template("contact.html")
@@ -301,7 +300,7 @@ def delete_product(id):
 
     conn = get_db_connection()
 
-    # Get image name
+    
     product = conn.execute(
         "SELECT image FROM products WHERE id=?", (id,)
     ).fetchone()
@@ -309,12 +308,12 @@ def delete_product(id):
     if product:
         image_filename = product["image"]
 
-        # Delete image file
+       
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
         if os.path.exists(image_path):
             os.remove(image_path)
 
-        # Delete from DB
+        
         conn.execute("DELETE FROM products WHERE id=?", (id,))
         conn.commit()
 
@@ -335,7 +334,7 @@ def edit_product(id):
         price = request.form['price']
         file = request.files['image']
 
-        # Get old image
+        
         old_product = conn.execute(
             "SELECT image FROM products WHERE id=?", (id,)
         ).fetchone()
@@ -343,12 +342,12 @@ def edit_product(id):
         old_image = old_product["image"]
 
         if file and file.filename:
-            # Delete old image
+           
             old_path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
             if os.path.exists(old_path):
                 os.remove(old_path)
 
-            # Save new image
+            
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
@@ -359,7 +358,7 @@ def edit_product(id):
             """, (name, description, filename, specifications, price, id))
 
         else:
-            # No new image
+            
             conn.execute("""
                 UPDATE products
                 SET name=?, description=?, specifications=?, price=?
@@ -371,7 +370,7 @@ def edit_product(id):
 
         return redirect('/admin')
 
-    # GET request
+    
     product = conn.execute(
         "SELECT * FROM products WHERE id=?", (id,)
     ).fetchone()
@@ -441,7 +440,7 @@ def mark_read(id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
 
 
 
