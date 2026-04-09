@@ -13,7 +13,7 @@
     
     <div class="col-md-4 mb-4">
         <div class="card shadow">
-            <img src="{{ url_for('static', filename='uploads/'+ product.image) }}" class="card-img-top">
+            <img src="{{ url_for('static', filename='uploads/'+ product.image) }}?v=1" class="card-img-top">
             <div class="card-body text-center">
                 <h5 >{{product.name}}</h5>
                 <p>{{product.description}}</p>
