@@ -25,7 +25,7 @@ app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
 
 mail = Mail(app)
 
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
