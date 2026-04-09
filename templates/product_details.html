@@ -3,13 +3,14 @@
 
 {% block content %}
 
+<div class="product-details-page">
 <div class="container mt-5">
 
 <h2 class="mb-4">{{ product.name }}</h2>
 
 <div class="row">
 
-<!-- Left Side : Product Image -->
+
 <div class="col-md-6">
 
 <img src="{{ url_for('static', filename='uploads/' + product.image) }}"
@@ -18,7 +19,7 @@ class="img-fluid rounded">
 </div>
 
 
-<!-- Right Side : Product Information -->
+
 <div class="col-md-6">
 
 <h4>About Product</h4>
@@ -26,10 +27,35 @@ class="img-fluid rounded">
 <p>{{ product.specifications }}</p>
 <p>Price:{{ product.price }}</p>
 
+<div class="product-cta mt-4">
+  <a href="/contact?product={{ product.name | urlencode }}" class="btn cta-enquire">
+    <i class="bi bi-chat-dots-fill me-1"></i> Enquire Now
+  </a>
+  <a href="tel:+919702115408" class="btn cta-call">
+    <i class="bi bi-telephone-fill me-1"></i> Call Now
+  </a>
+  <a href="https://wa.me/919702115408?text={{ ('Hi, I want enquiry for ' ~ product.name) | urlencode }}"
+   target="_blank"
+   class="btn btn-success fw-semibold">
+  WhatsApp
+</a>
 </div>
+
 
 </div>
 
 </div>
 
+</div>
+
+<div class="sticky-cta d-md-none">
+  <a href="/contact?product={{ product.name | urlencode }}" class="sticky-btn sticky-enquire">
+    Enquire Now
+  </a>
+  <a href="tel:+919702115408" class="sticky-btn sticky-call">
+    Call Now
+  </a>
+</div>
+
+ </div>
 {% endblock %}

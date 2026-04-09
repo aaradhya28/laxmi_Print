@@ -5,70 +5,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LaxmiPrint</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
-<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light navbar-laxmi shadow-sm sticky-top px-3">
 
-<a class="navbar-brand d-flex align-items-center" href="/">
-    <img src="{{ url_for('static', filename='uploads/logo.jpeg') }}"
-         alt="LaxmiPrint Logo"
-         width="50"
-         height="50"
-         class="me-2">
-
-    <span class="fw-bold text-white">LaxmiPrint</span>
+      <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="/">
+  <img src="{{ url_for('static', filename='uploads/logofinal-removebg-preview.png') }}" alt="LaxmiPrint Logo" class="brand-logo">
+  
 </a>
+<div class="ms-auto nav-links-wrap">
+  <a class="nav-link" href="/">Home</a>
+  <a class="nav-link" href="/products">Products</a>
+  <a class="nav-link" href="/about">About</a>
+  <a class="nav-link" href="/contact">Contact</a>
 
-<div class="ms-auto">
-
-<a class="nav-link text-white d-inline me-3" href="/">Home</a>
-<a class="nav-link text-white d-inline me-3" href="/products">Products</a>
-<a class="nav-link text-white d-inline me-3" href="/about">About</a>
-<a class="nav-link text-white d-inline me-3" href="/contact">Contact</a>
-
-{% if session.get('admin') %}
-
-<div class="dropdown d-inline">
-<button class="btn text-white fs-5" data-bs-toggle="dropdown">
-<i class="bi bi-three-dots-vertical"></i>
-</button>
-
-<ul class="dropdown-menu dropdown-menu-end">
-<li><a class="dropdown-item" href="/admin">Admin Panel</a></li>
-<li><a class="dropdown-item" href="/logout">Logout</a></li>
-</ul>
-</div>
-
-{% else %}
-
-<a href="/login" class="btn btn-outline-light btn-sm">Login</a>
-
-{% endif %}
-
-</div>
-
+  <div class="dropdown">
+    <button class="btn text-dark p-0 border-0 bg-transparent ms-2"
+            type="button"
+            id="adminMenu"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+      <i class="bi bi-three-dots-vertical fs-5"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminMenu">
+      {% if session.get('admin') %}
+        <li><a class="dropdown-item" href="/admin">Admin Panel</a></li>
+        <li><a class="dropdown-item" href="/logout">Logout</a></li>
+      {% else %}
+        <li><a class="dropdown-item" href="/login">Login</a></li>
+      {% endif %}
+    </ul>
+  </div>
 </div>
 </nav>
 <div class="container mt-4">
     {% block content %}{% endblock %}
 </div>
 
-<footer class="footer mt-5">
+<footer class="footer mt-5 footer-laxmi">
 
 <div class="container">
 
 <div class="row">
 
 <div class="col-md-4">
-<h5>LaxmiPrint</h5>
+<h5>LaxmiDigitalPrint</h5>
 <p>
 High quality printing services for visiting cards,
 banners, flyers and more.
@@ -118,6 +104,7 @@ printwork.laxmi@gmail.com
 </div>
 
 </footer>
+{% block scripts %}{% endblock %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     

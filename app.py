@@ -4,8 +4,15 @@ import os
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+# Load env variables from `local.env` (used in this project) so email works.
+# Falls back to default dotenv lookup if not present.
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "local.env"))
 
 app = Flask(__name__)
+
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD_HASH = "scrypt:32768:8:1$umEQs7nwfTWE45dj$d8e3e804e8df7b61a577121b3128af70cd254f75861bf2e8cec1cf44c20480311788b59e85309d2dc923a020c77325b7937eab057202653078954a532482319b"
 
 # ✅ Secure config (use environment variables)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -18,7 +25,7 @@ app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
 
 mail = Mail(app)
 
-app.secret_key = os.environ.get("SECRET_KEY")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret")
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -73,13 +80,30 @@ def create_admin():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    username = "admin"
-    password = generate_password_hash("1234")
+    # Refuse to create an admin with an unset placeholder hash.
+    if ADMIN_PASSWORD_HASH == "<PASTE_PASSWORD_HASH_HERE>":
+        raise RuntimeError(
+            "ADMIN_PASSWORD_HASH is not set. Generate a password hash and paste it into app.py."
+        )
 
-    try:
-        cursor.execute("INSERT INTO admin (username, password) VALUES (?, ?)", (username, password))
-    except:
-        pass
+    username = ADMIN_USERNAME
+    password_hash = ADMIN_PASSWORD_HASH
+
+    # Insert admin only if it doesn't already exist; otherwise update hash.
+    existing = cursor.execute(
+        "SELECT id FROM admin WHERE username=?",
+        (username,)
+    ).fetchone()
+    if existing:
+        cursor.execute(
+            "UPDATE admin SET password=? WHERE username=?",
+            (password_hash, username),
+        )
+    else:
+        cursor.execute(
+            "INSERT INTO admin (username, password) VALUES (?, ?)",
+            (username, password_hash),
+        )
 
     conn.commit()
     conn.close()
@@ -128,12 +152,22 @@ def contact():
         conn.close()
 
         # Send email
+        logo_url = url_for(
+            'static',
+            filename='uploads/logofinal-removebg-preview.png',
+            _external=True
+        )
+
         msg = Message(
             subject="New Contact Form Submission",
             sender=app.config['MAIL_USERNAME'],
             recipients=[app.config['MAIL_USERNAME']]
         )
-        msg.body = f"""<h2 style="color:#333;">New Contact Form Submission</h2>
+        msg.html = f"""
+        <div style="margin-bottom:18px;">
+          <img src="{{ url_for('static', filename='uploads/logofinal-removebg-preview.png') }}" alt="LaxmiPrint" style="height:60px; width:auto; display:block;">
+        </div>
+        <h2 style="color:#333; margin-top:0;">New Contact Form Submission</h2>
 
         <table style="border-collapse: collapse; width: 100%; font-family: Arial;">
         <tr>
@@ -163,17 +197,18 @@ def contact():
         This message was sent from your website contact form.
         </p>
         """
-        mail.send(msg)
-
         
         reply = Message(
-            subject="✅ Thank You for Contacting LaxmiPrint",
+            subject="✅ Thank You for Contacting LaxmiDigitalPrint",
             sender=app.config['MAIL_USERNAME'],
             recipients=[email]   # user email
         )
 
         reply.html = f"""
-            <h2 style="color:#333;">Hello {name}, 👋</h2>
+            <div style="margin-bottom:18px;">
+              <img src="{logo_url}" alt="LaxmiPrint" style="height:60px; width:auto; display:block;">
+            </div>
+            <h2 style="color:#333; margin-top:0;">Hello {name}, 👋</h2>
 
             <p>Thank you for contacting <b>LaxmiPrint</b>.</p>
 
@@ -188,7 +223,22 @@ def contact():
 
             <br>
 
-            <p>📞 If urgent, feel free to contact us directly.</p>
+            <p>If urgent, feel free to contact us directly.</p>
+
+            <p>
+            <i class="bi bi-telephone-fill me-2 text-success"></i>
+            +91 9702115408 / 7710977432 / 8169265622
+            </p>
+
+            <p>
+            <i class="bi bi-envelope-fill me-2 text-primary"></i>
+            printwork.laxmi@gmail.com
+            </p>
+
+            <p>
+            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>
+            Shubh Ranjani Co Housing Society, Flat No C9, Sector 3, Airoli, Navi Mumbai 400708
+            </p>
 
             <p style="color:gray;">
             Regards,<br>
@@ -196,9 +246,13 @@ def contact():
             </p>
             """
 
-        mail.send(reply)
-        flash("✅ Your message has been sent successfully!")
-        return redirect("/contact")
+        try:
+            mail.send(msg)      # admin mail
+            mail.send(reply)    # user mail
+            flash("✅ Your message has been sent successfully!", "success")
+        except Exception as e:
+            print("Mail error:", e)  # check terminal logs
+            flash("Message saved, but email could not be sent right now.", "warning")
     
     return render_template("contact.html")
 

@@ -1,0 +1,9 @@
+myenv/
+__pycache__/
+*.pyc
+local.env
+database.db
+static/uploads/
+.DS_Store
+Thumbs.db
+.vscode/

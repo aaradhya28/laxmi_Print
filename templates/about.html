@@ -5,7 +5,7 @@
 
 <div class="about-page">
 
-<h1 class="mb-4 text-center">About LaxmiPrint</h1>
+<h1 class="mb-4 text-center">About LaxmiDigitalPrint</h1>
 
 <p class="lead text-center">
 LaxmiPrint provides high-quality printing services for businesses,
@@ -22,7 +22,7 @@ and affordable printing solutions.
 </div>
 
 <div class="col-md-6">
-<h3 class="fw-bold">Our Story</h3>
+<h3>Our Story</h3>
 
 <p>
 LaxmiPrint started with a mission to provide reliable and
@@ -42,14 +42,13 @@ LaxmiPrint is a professional printing service dedicated to delivering high-quali
 
 </div>
 
-<h3>Why Choose Us</h3>
 
 <h2 class="text-center fw-bold mb-4">Why Choose Us</h2>
 
 <div class="row text-center mb-5">
 
 <div class="col-md-4">
-<div class="p-4 shadow-sm rounded bg-white h-100">
+<div class="why-card p-4 shadow-sm rounded bg-white h-100">
 <h2>⚡</h2>
 <h5>Fast Delivery</h5>
 <p>Quick turnaround time for all printing orders.</p>
@@ -57,7 +56,7 @@ LaxmiPrint is a professional printing service dedicated to delivering high-quali
 </div>
 
 <div class="col-md-4">
-<div class="p-4 shadow-sm rounded bg-white h-100">
+<div class="why-card p-4 shadow-sm rounded bg-white h-100">
 <h2>🎨</h2>
 <h5>Creative Designs</h5>
 <p>Quick turnaround time for all printing orders.</p>
@@ -65,7 +64,7 @@ LaxmiPrint is a professional printing service dedicated to delivering high-quali
 </div>
 
 <div class="col-md-4">
-<div class="p-4 shadow-sm rounded bg-white h-100">
+<div class="why-card p-4 shadow-sm rounded bg-white h-100">
 <h2>⭐</h2>
 <h5>Premium Quality</h5>
 <p>We use high-quality materials for long-lasting prints.</p>
@@ -86,69 +85,70 @@ LaxmiPrint is a professional printing service dedicated to delivering high-quali
    
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/black_white_machine.jpeg') }}">
-      <h5>Offset Printer</h5>
+      <h5>Black & White Machine</h5>
       <p>High quality bulk printing</p>
     </div>
 
     
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/center_pinning_machine.png') }}">
-      <h5>Digital Printer</h5>
-      <p>Fast and flexible printing</p>
+      <h5>Center Pinning Machine</h5>
+      <p>Neat and aligned binding</p>
     </div>
 
     <div class="machine-card">
-      <img src="{{ url_for('static', filename='uploads/cold_laminions.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <img src="{{ url_for('static', filename='uploads/cold.png') }}">
+      <h5>Cold Lamination Machinee</h5>
+      <p>Water and scratch resistance</p>
     </div>
 
     <div class="machine-card">
-      <img src="{{ url_for('static', filename='uploads/crazing_properation_machine.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <img src="{{ url_for('static', filename='uploads/crazing.png') }}">
+      <h5>Creasing & Perforation Machine</h5>
+      <p>Clean and professional finish</p>
     </div>
 
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/eco_machine.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <h5>Eco Machine</h5>
+      <p>Eco-friendly printing</p>
     </div>
 
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/feltbed_machine.png') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <h5>Flatbed Printing Machine</h5>
+      <p>Supports heavy and thick materials</p>
     </div>
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/flex_banner.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <h5>Flex Banner Machine</h5>
+      <p>Weather-resistant prints</p>
+      
     </div>
     <div class="machine-card">
-      <img src="{{ url_for('static', filename='uploads/konica_minolta.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <img src="{{ url_for('static', filename='uploads/konica.jpeg') }}">
+      <h5>Konica Minolta Machine</h5>
+      <p>Supports bulk printing</p>
     </div>
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/plotter_machine.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <h5>Plotter Machine</h5>
+      <p>Supports vector graphics</p>
     </div>
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/Polar_cutting_machine.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <h5>Polar Cutting Machine</h5>
+      <p>High cutting accuracy</p>
     </div>
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/sticker_shape_cut_machine.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <h5>Sticker Shape Cutting Machine</h5>
+      <p>Ideal for bulk sticker production</p>
     </div>
     <div class="machine-card">
       <img src="{{ url_for('static', filename='uploads/Thermal_laminious_machine.jpeg') }}">
-      <h5>Banner Machine</h5>
-      <p>Large format printing</p>
+      <h5>Thermal Lamination Machine</h5>
+      <p>Uses heat-based lamination</p>
     </div>
 
     
@@ -157,4 +157,57 @@ LaxmiPrint is a professional printing service dedicated to delivering high-quali
 
 </div>
  
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const slider = document.querySelector(".machine-slider");
+  const track = document.getElementById("track");
+  const cards = track.querySelectorAll(".machine-card");
+
+  if (!slider || !track || cards.length === 0) return;
+
+  let index = 0;
+  let paused = false;
+
+ 
+  const getStep = () => {
+    const cardWidth = cards[0].offsetWidth;
+    const gap = 20;
+    return cardWidth + gap;
+  };
+
+  
+  cards.forEach(card => {
+    const clone = card.cloneNode(true);
+    track.appendChild(clone);
+  });
+
+  function slideNext() {
+    if (paused) return;
+
+    index++;
+    const step = getStep();
+    track.style.transform = `translateX(-${index * step}px)`;
+
+   
+    if (index >= cards.length) {
+      setTimeout(() => {
+        track.style.transition = "none";
+        track.style.transform = "translateX(0)";
+        index = 0;
+
+       
+        requestAnimationFrame(() => {
+          track.style.transition = "transform 0.6s ease";
+        });
+      }, 650);
+    }
+  }
+
+  const interval = setInterval(slideNext, 2200); 
+  slider.addEventListener("mouseenter", () => paused = true);
+  slider.addEventListener("mouseleave", () => paused = false);
+});
+</script>
 {% endblock %}
