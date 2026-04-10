@@ -134,127 +134,88 @@ def about():
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        message = request.form["message"]
-
-        if not phone.isdigit() or len(phone) != 10:
-            flash("Phone number must be 10 digits")
-            return redirect("/contact")
-
-        conn = get_db_connection()
-        conn.execute(
-            "INSERT INTO contacts (name,email,message,phone) VALUES (?,?,?,?)",
-            (name, email, message, phone)
-        )
-        conn.commit()
-        conn.close()
-
-       
-        logo_url = url_for(
-            'static',
-            filename='uploads/logofinal-removebg-preview.png',
-            _external=True
-        )
-
-        
-        msg = Message(
-            subject="New Contact Form Submission",
-            sender=app.config['MAIL_USERNAME'],
-            recipients=[app.config['MAIL_USERNAME']]
-        )
-
-        msg.html = f"""
-        <div style="margin-bottom:18px;">
-        <img src="{logo_url}" alt="LaxmiPrint" style="height:60px; width:auto; display:block;">
-        </div>
-
-        <h2 style="color:#333;">New Contact Form Submission</h2>
-
-        <table style="border-collapse: collapse; width: 100%; font-family: Arial;">
-        <tr>
-            <td style="padding:8px; border:1px solid #ddd;"><b>Name</b></td>
-            <td style="padding:8px; border:1px solid #ddd;">{name}</td>
-        </tr>
-
-        <tr>
-            <td style="padding:8px; border:1px solid #ddd;"><b>Email</b></td>
-            <td style="padding:8px; border:1px solid #ddd;">{email}</td>
-        </tr>
-
-        <tr>
-            <td style="padding:8px; border:1px solid #ddd;"><b>Phone</b></td>
-            <td style="padding:8px; border:1px solid #ddd;">{phone}</td>
-        </tr>
-
-        <tr>
-            <td style="padding:8px; border:1px solid #ddd;"><b>Message</b></td>
-            <td style="padding:8px; border:1px solid #ddd;">{message}</td>
-        </tr>
-        </table>
-
-        <p style="color:gray;">This message was sent from your website contact form.</p>
-        """
-
-        
-        reply = Message(
-            subject="✅ Thank You for Contacting LaxmiDigitalPrint",
-            sender=app.config['MAIL_USERNAME'],
-            recipients=[email]
-        )
-
-        reply.html = f"""
-        <div style="margin-bottom:18px;">
-        <img src="{logo_url}" alt="LaxmiPrint" style="height:60px;">
-        </div>
-
-        <h2>Hello {name}, 👋</h2>
-
-        <p>Thank you for contacting <b>LaxmiPrint</b>.</p>
-
-        <p>We have received your inquiry and will get back to you within <b>24 hours</b>.</p>
-
-        <hr>
-
-        <h4>Your Message:</h4>
-        <p style="background:#f4f4f4; padding:10px;">
-        {message}
-        </p>
-
-        <p>If urgent, contact us directly:</p>
-
-        <p>📞 +91 9702115408 / 7710977432 / 8169265622</p>
-        <p>📧 printwork.laxmi@gmail.com</p>
-        <p>📍 Navi Mumbai, India</p>
-
-        <p style="color:gray;">
-        Regards,<br>
-        <b>LaxmiPrint Team</b>
-        </p>
-        """
-
-        
         try:
-            if app.config['MAIL_USERNAME'] and app.config['MAIL_PASSWORD']:
+            name = request.form.get("name")
+            email = request.form.get("email")
+            phone = request.form.get("phone")
+            message = request.form.get("message")
+
+           
+            if not phone or not phone.isdigit() or len(phone) != 10:
+                flash("Phone number must be 10 digits")
+                return redirect("/contact")
+
+            
+            conn = get_db_connection()
+            conn.execute(
+                "INSERT INTO contacts (name,email,message,phone) VALUES (?,?,?,?)",
+                (name, email, message, phone)
+            )
+            conn.commit()
+            conn.close()
+
+            
+            try:
+                logo_url = url_for(
+                    'static',
+                    filename='uploads/logofinal-removebg-preview.png',
+                    _external=True
+                )
+            except:
+                logo_url = ""
+
+            
+            if app.config.get('MAIL_USERNAME') and app.config.get('MAIL_PASSWORD'):
+
                 try:
+                    msg = Message(
+                        subject="New Contact Form Submission",
+                        sender=app.config['MAIL_USERNAME'],
+                        recipients=[app.config['MAIL_USERNAME']]
+                    )
+
+                    msg.html = f"""
+                    <h2>New Contact Form</h2>
+                    <p><b>Name:</b> {name}</p>
+                    <p><b>Email:</b> {email}</p>
+                    <p><b>Phone:</b> {phone}</p>
+                    <p><b>Message:</b> {message}</p>
+                    """
+
                     mail.send(msg)
+
                 except Exception as e:
-                    print("Admin mail failed:", e)
+                    print("Admin mail error:", e)
 
                 try:
-                    mail.send(reply)
-                except Exception as e:
-                    print("User mail failed:", e)
+                    reply = Message(
+                        subject="Thank You",
+                        sender=app.config['MAIL_USERNAME'],
+                        recipients=[email]
+                    )
 
-                flash("✅ Your message has been sent successfully!", "success")
+                    reply.html = f"""
+                    <h3>Hello {name}</h3>
+                    <p>Thanks for contacting us.</p>
+                    """
+
+                    mail.send(reply)
+
+                except Exception as e:
+                    print("User mail error:", e)
+
             else:
                 print("Mail config missing")
-                flash("Message saved, but email not configured.", "warning")
+
+            flash("✅ Message sent successfully!", "success")
 
         except Exception as e:
-            print("Mail error:", e)
-            flash("Message saved, but email could not be sent.", "warning")
+            print("CONTACT ERROR:", e)
+            flash("Something went wrong. Try again.", "danger")
+
+        return redirect("/contact")
+
+    return render_template("contact.html")
 
 @app.route("/product_details/<int:id>")
 def product_details(id):
