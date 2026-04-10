@@ -32,7 +32,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 def get_db_connection():
-    DB_PATH = os.path.join(os.getcwd(), "database.db")
+    DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
@@ -151,23 +151,26 @@ def contact():
         conn.commit()
         conn.close()
 
-        # Send email
+       
         logo_url = url_for(
             'static',
             filename='uploads/logofinal-removebg-preview.png',
             _external=True
         )
 
+        
         msg = Message(
             subject="New Contact Form Submission",
             sender=app.config['MAIL_USERNAME'],
             recipients=[app.config['MAIL_USERNAME']]
         )
+
         msg.html = f"""
         <div style="margin-bottom:18px;">
-          <img src="{{ url_for('static', filename='uploads/logofinal-removebg-preview.png') }}" alt="LaxmiPrint" style="height:60px; width:auto; display:block;">
+        <img src="{logo_url}" alt="LaxmiPrint" style="height:60px; width:auto; display:block;">
         </div>
-        <h2 style="color:#333; margin-top:0;">New Contact Form Submission</h2>
+
+        <h2 style="color:#333;">New Contact Form Submission</h2>
 
         <table style="border-collapse: collapse; width: 100%; font-family: Arial;">
         <tr>
@@ -191,70 +194,67 @@ def contact():
         </tr>
         </table>
 
-        <br>
-
-        <p style="color:gray;">
-        This message was sent from your website contact form.
-        </p>
+        <p style="color:gray;">This message was sent from your website contact form.</p>
         """
+
         
         reply = Message(
             subject="✅ Thank You for Contacting LaxmiDigitalPrint",
             sender=app.config['MAIL_USERNAME'],
-            recipients=[email]   # user email
+            recipients=[email]
         )
 
         reply.html = f"""
-            <div style="margin-bottom:18px;">
-              <img src="{logo_url}" alt="LaxmiPrint" style="height:60px; width:auto; display:block;">
-            </div>
-            <h2 style="color:#333; margin-top:0;">Hello {name}, 👋</h2>
+        <div style="margin-bottom:18px;">
+        <img src="{logo_url}" alt="LaxmiPrint" style="height:60px;">
+        </div>
 
-            <p>Thank you for contacting <b>LaxmiPrint</b>.</p>
+        <h2>Hello {name}, 👋</h2>
 
-            <p>We have received your inquiry and our team will get back to you within <b>24 hours</b>.</p>
+        <p>Thank you for contacting <b>LaxmiPrint</b>.</p>
 
-            <hr>
+        <p>We have received your inquiry and will get back to you within <b>24 hours</b>.</p>
 
-            <h4>Your Message:</h4>
-            <p style="background:#f4f4f4; padding:10px; border-radius:5px;">
-            {message}
-            </p>
+        <hr>
 
-            <br>
+        <h4>Your Message:</h4>
+        <p style="background:#f4f4f4; padding:10px;">
+        {message}
+        </p>
 
-            <p>If urgent, feel free to contact us directly.</p>
+        <p>If urgent, contact us directly:</p>
 
-            <p>
-            <i class="bi bi-telephone-fill me-2 text-success"></i>
-            +91 9702115408 / 7710977432 / 8169265622
-            </p>
+        <p>📞 +91 9702115408 / 7710977432 / 8169265622</p>
+        <p>📧 printwork.laxmi@gmail.com</p>
+        <p>📍 Navi Mumbai, India</p>
 
-            <p>
-            <i class="bi bi-envelope-fill me-2 text-primary"></i>
-            printwork.laxmi@gmail.com
-            </p>
+        <p style="color:gray;">
+        Regards,<br>
+        <b>LaxmiPrint Team</b>
+        </p>
+        """
 
-            <p>
-            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>
-            Shubh Ranjani Co Housing Society, Flat No C9, Sector 3, Airoli, Navi Mumbai 400708
-            </p>
-
-            <p style="color:gray;">
-            Regards,<br>
-            <b>LaxmiPrint Team</b>
-            </p>
-            """
-
+        
         try:
-            mail.send(msg)      # admin mail
-            mail.send(reply)    # user mail
-            flash("✅ Your message has been sent successfully!", "success")
+            if app.config['MAIL_USERNAME'] and app.config['MAIL_PASSWORD']:
+                try:
+                    mail.send(msg)
+                except Exception as e:
+                    print("Admin mail failed:", e)
+
+                try:
+                    mail.send(reply)
+                except Exception as e:
+                    print("User mail failed:", e)
+
+                flash("✅ Your message has been sent successfully!", "success")
+            else:
+                print("Mail config missing")
+                flash("Message saved, but email not configured.", "warning")
+
         except Exception as e:
-            print("Mail error:", e)  
-            flash("Message saved, but email could not be sent right now.", "warning")
-    
-    return render_template("contact.html")
+            print("Mail error:", e)
+            flash("Message saved, but email could not be sent.", "warning")
 
 @app.route("/product_details/<int:id>")
 def product_details(id):
