@@ -18,6 +18,10 @@ DATABASE_PATH = os.getenv(
     os.path.join(os.path.dirname(__file__), "database.db")
 )
 ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+MAIL_ENABLED = os.getenv(
+    "MAIL_ENABLED",
+    "false" if os.getenv("RENDER") else "true"
+).lower() == "true"
 
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -26,7 +30,10 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME']  = os.environ.get("MAIL_USERNAME")
 app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 
-app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
+app.config['MAIL_DEFAULT_SENDER'] = (
+    os.getenv("MAIL_DEFAULT_SENDER")
+    or app.config['MAIL_USERNAME']
+)
 
 mail = Mail(app)
 
@@ -103,6 +110,42 @@ def save_uploaded_image(file_storage):
     unique_name = f"{secrets.token_hex(12)}{extension.lower()}"
     file_storage.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_name))
     return unique_name
+
+
+def send_contact_emails(name, email, phone, message):
+    if not MAIL_ENABLED:
+        print("Mail sending disabled by MAIL_ENABLED setting.")
+        return
+
+    if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD'):
+        print("Mail config missing")
+        return
+
+    admin_message = Message(
+        subject="New Contact Form Submission",
+        sender=app.config['MAIL_DEFAULT_SENDER'],
+        recipients=[app.config['MAIL_USERNAME']]
+    )
+    admin_message.html = f"""
+    <h2>New Contact Form</h2>
+    <p><b>Name:</b> {name}</p>
+    <p><b>Email:</b> {email}</p>
+    <p><b>Phone:</b> {phone}</p>
+    <p><b>Message:</b> {message}</p>
+    """
+
+    reply_message = Message(
+        subject="Thank You",
+        sender=app.config['MAIL_DEFAULT_SENDER'],
+        recipients=[email]
+    )
+    reply_message.html = f"""
+    <h3>Hello {name}</h3>
+    <p>Thanks for contacting us.</p>
+    """
+
+    mail.send(admin_message)
+    mail.send(reply_message)
 
 
 def init_db():
@@ -219,58 +262,10 @@ def contact():
             conn.commit()
             conn.close()
 
-            
             try:
-                logo_url = url_for(
-                    'static',
-                    filename='uploads/logofinal-removebg-preview.png',
-                    _external=True
-                )
-            except:
-                logo_url = ""
-
-            
-            if app.config.get('MAIL_USERNAME') and app.config.get('MAIL_PASSWORD'):
-
-                try:
-                    msg = Message(
-                        subject="New Contact Form Submission",
-                        sender=app.config['MAIL_USERNAME'],
-                        recipients=[app.config['MAIL_USERNAME']]
-                    )
-
-                    msg.html = f"""
-                    <h2>New Contact Form</h2>
-                    <p><b>Name:</b> {name}</p>
-                    <p><b>Email:</b> {email}</p>
-                    <p><b>Phone:</b> {phone}</p>
-                    <p><b>Message:</b> {message}</p>
-                    """
-
-                    mail.send(msg)
-
-                except Exception as e:
-                    print("Admin mail error:", e)
-
-                try:
-                    reply = Message(
-                        subject="Thank You",
-                        sender=app.config['MAIL_USERNAME'],
-                        recipients=[email]
-                    )
-
-                    reply.html = f"""
-                    <h3>Hello {name}</h3>
-                    <p>Thanks for contacting us.</p>
-                    """
-
-                    mail.send(reply)
-
-                except Exception as e:
-                    print("User mail error:", e)
-
-            else:
-                print("Mail config missing")
+                send_contact_emails(name, email, phone, message)
+            except Exception as e:
+                print("Contact mail error:", e)
 
             flash("Message sent successfully!", "success")
 
