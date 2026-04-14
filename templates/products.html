@@ -5,19 +5,19 @@
     <div class="page-content products-page">
     <h2 class="mb-4">Our Products</h2>
 
-<div class="row">
+<div class="row align-items-stretch">
     {% for product in products %}
         
     
 
     
-    <div class="col-md-4 mb-4">
-        <div class="card shadow">
+    <div class="col-md-4 mb-4 d-flex">
+        <div class="card shadow product-card w-100">
             <img src="{{ url_for('static', filename='uploads/'+ product.image) }}?v=1" class="card-img-top">
-            <div class="card-body text-center">
+            <div class="card-body text-center d-flex flex-column">
                 <h5 >{{product.name}}</h5>
                 <p>{{product.description}}</p>
-                <a href="/product_details/{{product.id}}" class="btn btn-dark">View Details</a>
+                <a href="/product_details/{{product.id}}" class="btn btn-dark mt-auto">View Details</a>
             </div>
         </div>
         </div>

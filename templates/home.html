@@ -39,25 +39,25 @@
 
     <h2 class="text-center mb-4">Our Products</h2>
 
-    <div class="row">
+    <div class="row align-items-stretch">
 
         {% for product in products %}
 
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4 d-flex">
 
-            <div class="card product-card">
+            <div class="card product-card w-100">
 
                 <img src="{{ url_for('static', filename='uploads/' + product.image) }}"
                      class="card-img-top">
 
-                <div class="card-body text-center">
+                <div class="card-body text-center d-flex flex-column">
 
                     <h5 class="card-title">{{ product.name }}</h5>
 
                     <p class="card-text">{{ product.description[:80] }}...</p>
 
                     <a href="/product_details/{{ product.id }}"
-                       class="btn btn-dark">
+                       class="btn btn-dark mt-auto">
                        View Details
                     </a>
 
