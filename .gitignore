@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 local.env
 database.db
+*.db-journal
 # static/uploads/
 .DS_Store
 Thumbs.db

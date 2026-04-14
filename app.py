@@ -1,6 +1,7 @@
-from flask import Flask, render_template, redirect, request, session, url_for, flash
+from flask import Flask, abort, render_template, redirect, request, session, url_for, flash
 import sqlite3
 import os
+import secrets
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -10,8 +11,13 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "local.env"))
 
 app = Flask(__name__)
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD_HASH = "scrypt:32768:8:1$umEQs7nwfTWE45dj$d8e3e804e8df7b61a577121b3128af70cd254f75861bf2e8cec1cf44c20480311788b59e85309d2dc923a020c77325b7937eab057202653078954a532482319b"
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH")
+DATABASE_PATH = os.getenv(
+    "DATABASE_PATH",
+    os.path.join(os.path.dirname(__file__), "database.db")
+)
+ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -24,7 +30,19 @@ app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
 
 mail = Mail(app)
 
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["SECRET_KEY"] = (
+    os.getenv("SECRET_KEY")
+    or os.getenv("FLASK_SECRET_KEY")
+    or secrets.token_hex(32)
+)
+
+if not os.getenv("SECRET_KEY") and not os.getenv("FLASK_SECRET_KEY"):
+    print("WARNING: SECRET_KEY is not set. Using a temporary generated key.")
+
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = bool(os.getenv("RENDER"))
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -32,10 +50,59 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 def get_db_connection():
-    DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def generate_csrf_token():
+    token = session.get("_csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["_csrf_token"] = token
+    return token
+
+
+@app.context_processor
+def inject_csrf_token():
+    return {"csrf_token": generate_csrf_token}
+
+
+@app.before_request
+def protect_post_routes():
+    if request.method != "POST":
+        return
+
+    session_token = session.get("_csrf_token")
+    form_token = request.form.get("csrf_token")
+
+    if not session_token or not form_token:
+        abort(400)
+
+    if not secrets.compare_digest(session_token, form_token):
+        abort(400)
+
+
+def allowed_file(filename):
+    _, extension = os.path.splitext(filename)
+    return extension.lower() in ALLOWED_EXTENSIONS
+
+
+def save_uploaded_image(file_storage):
+    if not file_storage or not file_storage.filename:
+        raise ValueError("Please select an image to upload.")
+
+    if not allowed_file(file_storage.filename):
+        raise ValueError("Only PNG, JPG, JPEG, GIF, and WEBP files are allowed.")
+
+    if file_storage.mimetype and not file_storage.mimetype.startswith("image/"):
+        raise ValueError("Uploaded file must be an image.")
+
+    safe_name = secure_filename(file_storage.filename)
+    _, extension = os.path.splitext(safe_name)
+    unique_name = f"{secrets.token_hex(12)}{extension.lower()}"
+    file_storage.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_name))
+    return unique_name
 
 
 def init_db():
@@ -76,15 +143,13 @@ def init_db():
     conn.close()
 
 
-def create_admin():
+def seed_admin_from_env():
+    if not ADMIN_USERNAME or not ADMIN_PASSWORD_HASH:
+        print("WARNING: ADMIN_USERNAME or ADMIN_PASSWORD_HASH is not set. Admin bootstrap skipped.")
+        return
+
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    
-    if ADMIN_PASSWORD_HASH == "<PASTE_PASSWORD_HASH_HERE>":
-        raise RuntimeError(
-            "ADMIN_PASSWORD_HASH is not set. Generate a password hash and paste it into app.py."
-        )
 
     username = ADMIN_USERNAME
     password_hash = ADMIN_PASSWORD_HASH
@@ -109,7 +174,7 @@ def create_admin():
     conn.close()
 
 init_db()
-create_admin()
+seed_admin_from_env()
 
 
 
@@ -207,7 +272,7 @@ def contact():
             else:
                 print("Mail config missing")
 
-            flash("✅ Message sent successfully!", "success")
+            flash("Message sent successfully!", "success")
 
         except Exception as e:
             print("CONTACT ERROR:", e)
@@ -240,9 +305,12 @@ def admin():
         specifications = request.form["specifications"]
         price = request.form["price"]
         file = request.files["image"]
-
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        try:
+            filename = save_uploaded_image(file)
+        except ValueError as e:
+            flash(str(e), "danger")
+            conn.close()
+            return redirect("/admin")
 
         conn.execute(
             "INSERT INTO products (name, description, image, specifications, price) VALUES (?, ?, ?, ?, ?)",
@@ -255,7 +323,7 @@ def admin():
 
     return render_template("admin.html", products=products)
 
-@app.route('/delete/<int:id>')
+@app.route('/delete/<int:id>', methods=['POST'])
 def delete_product(id):
     if 'admin' not in session:
         return redirect('/login')
@@ -304,14 +372,16 @@ def edit_product(id):
         old_image = old_product["image"]
 
         if file and file.filename:
-           
+            try:
+                filename = save_uploaded_image(file)
+            except ValueError as e:
+                flash(str(e), "danger")
+                conn.close()
+                return redirect(f"/edit/{id}")
+
             old_path = os.path.join(app.config['UPLOAD_FOLDER'], old_image)
             if os.path.exists(old_path):
                 os.remove(old_path)
-
-            
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
             conn.execute("""
                 UPDATE products
@@ -374,7 +444,7 @@ def admin_messages():
 
     return render_template("admin_messages.html", messages=messages)
 
-@app.route("/delete_message/<int:id>")
+@app.route("/delete_message/<int:id>", methods=['POST'])
 def delete_message(id):
     if 'admin' not in session:
         return redirect("/login")
@@ -387,7 +457,7 @@ def delete_message(id):
 
     return redirect("/admin/messages")
 
-@app.route("/mark-read/<int:id>")
+@app.route("/mark-read/<int:id>", methods=['POST'])
 def mark_read(id):
     if 'admin' not in session:
         return redirect("/login")

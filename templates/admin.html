@@ -6,9 +6,17 @@
 View Contact Messages
 </a>
 <hr>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
     <h2>Add New Product</h2>
 
     <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input class="form-control mb-2" type="text" name="name" placeholder="Product Name" required>
 
     <textarea class="form-control mb-2" name="description" placeholder="Description" required></textarea>
@@ -46,13 +54,17 @@ View Contact Messages
 <i class="bi bi-pencil-square"></i>
 </a>
 
-<a href="/delete/{{ product.id }}" 
-   class="btn btn-outline-danger btn-sm"
-   title="Delete Product"
-   onclick="return confirm('Are you sure?')">
-
-<i class="bi bi-trash"></i>
-</a>
+<form method="POST"
+      action="/delete/{{ product.id }}"
+      class="d-inline"
+      onsubmit="return confirm('Are you sure?')">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit"
+          class="btn btn-outline-danger btn-sm"
+          title="Delete Product">
+    <i class="bi bi-trash"></i>
+  </button>
+</form>
         </td>
     </tr>
     {% endfor %}

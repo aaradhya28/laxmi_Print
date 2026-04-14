@@ -38,17 +38,23 @@
   {% endif %}
 </td>
 <td>  
-<a href="/delete_message/{{ msg.id }}" 
-   class="btn btn-outline-danger btn-sm me-2"
-   title="Delete">
-   <i class="bi bi-trash"></i>
-</a>
+<form method="POST" action="/delete_message/{{ msg.id }}" class="d-inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit"
+          class="btn btn-outline-danger btn-sm me-2"
+          title="Delete">
+    <i class="bi bi-trash"></i>
+  </button>
+</form>
 {% if msg[5] == 0 %}
-<a href="/mark-read/{{ msg.id }}" 
-   class="btn btn-outline-success btn-sm me-2"
-   title="Mark as Read">
-   <i class="bi bi-check-circle"></i>
-</a>
+<form method="POST" action="/mark-read/{{ msg.id }}" class="d-inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit"
+          class="btn btn-outline-success btn-sm me-2"
+          title="Mark as Read">
+    <i class="bi bi-check-circle"></i>
+  </button>
+</form>
 {% endif %}
 </td>
 
