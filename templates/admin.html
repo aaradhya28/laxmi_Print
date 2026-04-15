@@ -15,7 +15,7 @@ View Contact Messages
 {% endwith %}
     <h2>Add New Product</h2>
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" id="productForm">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input class="form-control mb-2" type="text" name="name" placeholder="Product Name" required>
 
@@ -72,6 +72,47 @@ View Contact Messages
   
     
 </table>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("productForm");
+  if (!form) return;
+
+  const storageKey = "laxmiprint-admin-product-draft";
+  const fields = ["name", "description", "specifications", "price"];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    fields.forEach(function (fieldName) {
+      const field = form.elements[fieldName];
+      if (!field) return;
+
+      if (!field.value && saved[fieldName]) {
+        field.value = saved[fieldName];
+      }
+    });
+  } catch (error) {
+    console.log("Unable to restore product draft.", error);
+  }
+
+  fields.forEach(function (fieldName) {
+    const field = form.elements[fieldName];
+    if (!field) return;
+
+    field.addEventListener("input", function () {
+      const draft = {};
+      fields.forEach(function (name) {
+        const currentField = form.elements[name];
+        draft[name] = currentField ? currentField.value : "";
+      });
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+    });
+  });
+
+  form.addEventListener("submit", function () {
+    localStorage.removeItem(storageKey);
+  });
+});
+</script>
   </div>
   {% endblock %}
     

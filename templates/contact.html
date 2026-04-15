@@ -18,19 +18,19 @@
 
 <div class="col-md-6">
 
-<form method="POST">
+<form method="POST" id="contactForm">
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
 <div class="mb-3">
 <label class="form-label">Name</label>
-<input type="text" name="name" class="form-control" required>
+<input type="text" name="name" class="form-control" value="{{ request.form.get('name', '') }}" required>
 </div>
 
 <div class="mb-3">
 <label class="form-label">Email</label>
 <input type="email" name="email"
 placeholder="example@gmail.com"
- class="form-control" required>
+ class="form-control" value="{{ request.form.get('email', '') }}" required>
 </div>
 
 <div class="mb-3">
@@ -41,13 +41,14 @@ placeholder="example@gmail.com"
        placeholder="Enter 10 digit phone number"
        pattern="[0-9]{10}"
        maxlength="10"
+       value="{{ request.form.get('phone', '') }}"
        required>
        
 </div>
 
 <div class="mb-3">
 <label class="form-label">Message</label>
-<textarea name="message" rows="4" class="form-control" required></textarea>
+<textarea name="message" rows="4" class="form-control" required>{{ request.form.get('message', '') }}</textarea>
 </div>
 
 <button type="submit" class="btn btn-dark w-100">
@@ -82,5 +83,46 @@ banners, stickers, flyers and more.
 </div>
 
  </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("contactForm");
+  if (!form) return;
+
+  const storageKey = "laxmiprint-contact-form";
+  const fields = ["name", "email", "phone", "message"];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    fields.forEach(function (fieldName) {
+      const field = form.elements[fieldName];
+      if (!field) return;
+
+      if (!field.value && saved[fieldName]) {
+        field.value = saved[fieldName];
+      }
+    });
+  } catch (error) {
+    console.log("Unable to restore contact form draft.", error);
+  }
+
+  fields.forEach(function (fieldName) {
+    const field = form.elements[fieldName];
+    if (!field) return;
+
+    field.addEventListener("input", function () {
+      const draft = {};
+      fields.forEach(function (name) {
+        const currentField = form.elements[name];
+        draft[name] = currentField ? currentField.value : "";
+      });
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+    });
+  });
+
+  form.addEventListener("submit", function () {
+    localStorage.removeItem(storageKey);
+  });
+});
+</script>
 {% endblock %}
     

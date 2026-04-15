@@ -10,12 +10,14 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "local.env"))
 
 app = Flask(__name__)
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DATA_DIR = os.getenv("DATA_DIR") or os.getenv("RENDER_DISK_PATH") or BASE_DIR
 
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH")
 DATABASE_PATH = os.getenv(
     "DATABASE_PATH",
-    os.path.join(os.path.dirname(__file__), "database.db")
+    os.path.join(DATA_DIR, "database.db")
 )
 ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 MAIL_ENABLED = os.getenv(
@@ -51,8 +53,9 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = bool(os.getenv("RENDER"))
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER") or os.path.join(BASE_DIR, "static", "uploads")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
